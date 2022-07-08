@@ -1,6 +1,138 @@
+local TweenService = game:GetService("TweenService")
+
+__.MoveLava = function(NewPos, TInfo, Map, Active)
+	if Active then
+		if not TInfo then TInfo = TweenInfo.new(.2);elseif type(TInfo) == "number" then TInfo = TweenInfo.new(TInfo);end
+		if type(NewPos) == "userdata" then -- CFrame possibly
+			local Tween = TweenService:Create(game.Workspace.Lava, TInfo, {CFrame = NewPos})
+			Tween:Play()
+		elseif type(NewPos) == "number" then
+			local Tween = TweenService:Create(game.Workspace.Lava, TInfo, {Position = Vector3.new(
+				game.Workspace.Lava.Position.X,
+				game.Workspace.Lava.Position.Y + NewPos,
+				game.Workspace.Lava.Position.Z
+				)})
+			Tween:Play()
+		elseif type(NewPos) == "vector" then
+			local Tween = TweenService:Create(game.Workspace.Lava, TInfo, {Position = NewPos})
+			Tween:Play()
+		elseif type(NewPos) == "string" then
+			if tonumber(NewPos) then
+				NewPos = tonumber(NewPos)
+				local Tween = TweenService:Create(game.Workspace.Lava, TInfo, {Position = Vector3.new(
+					game.Workspace.Lava.Position.X,
+					game.Workspace.Lava.Position.Y + NewPos,
+					game.Workspace.Lava.Position.Z
+					)})
+				Tween:Play()
+			elseif Map:FindFirstChild(NewPos) then
+				local Tween = TweenService:Create(Map[NewPos], TInfo, {CFrame = Map[NewPos].CFrame})
+				Tween:Play()
+			end
+			
+		else
+			print(type(NewPos))
+		end
+	end
+end
+
+__.LavaColor = function(NewColor, TInfo, Active)
+	if Active then
+		if not TInfo then TInfo = TweenInfo.new(.2);elseif type(TInfo) == "number" then TInfo = TweenInfo.new(TInfo);end
+		local Tween = TweenService:Create(game.Workspace.Lava, TInfo, {Color = NewColor})
+		Tween:Play()
+	end
+end
+
+__.Reset = function(plr, Active)
+end
+
+__.MovePart = function(Part, NewPos, TInfo, Map, Active)
+	if Active then
+		if not TInfo then TInfo = TweenInfo.new(.2);elseif type(TInfo) == "number" then TInfo = TweenInfo.new(TInfo);end
+		if type(Part) == "userdata" then
+			if Part.Parent ~= game.Workspace then
+				if type(NewPos) == "userdata" then -- CFrame possibly
+					local Tween = TweenService:Create(Part, TInfo, {CFrame = NewPos})
+					Tween:Play()
+				end
+			end
+		elseif type(Part) == "string" then
+			if Map:FindFirstChild("String") then
+				if type(NewPos) == "userdata" then -- CFrame possibly
+					local Tween = TweenService:Create(Map[Part], TInfo, {CFrame = NewPos})
+					Tween:Play()
+				end
+			end
+		end
+	end
+end
+
+local XOffset
+local YOffset
+local ZOffset
 local T = 0
-while wait() do
-  T += 1;
-  print(T)
-  if T >= 10 then break;end;
+local t = 0
+__.CameraShake = function(Time, Intensity, Active)
+	if Active then
+		if not Intensity then Intensity = 1;end
+		T = math.floor(tick())
+		coroutine.resume(coroutine.create(function()
+			repeat
+				wait()
+				t = math.floor(tick())
+				XOffset = math.random(-100, 100) / 500 * Intensity
+				YOffset = math.random(-100, 100) / 500 * Intensity
+				ZOffset = math.random(-100, 100) / 500 * Intensity
+				game.Players.LocalPlayer.Character.Humanoid.CameraOffset = Vector3.new(XOffset, YOffset, ZOffset)
+			until t - T >= Time
+			game.Players.LocalPlayer.Character.Humanoid.CameraOffset = Vector3.new(0,0,0)
+		end))
+	end
+end
+
+__.Fov = function(Amount, TInfo, Active)
+	if Active then
+		if not TInfo then TInfo = TweenInfo.new(.2);elseif type(TInfo) == "number" then TInfo = TweenInfo.new(TInfo);end
+		local Tween = TweenService:Create(game.Workspace.CurrentCamera, TInfo, {FieldOfView = Amount})
+		Tween:Play()
+	end
+end
+
+__.Particles = function(Part, Enabled, Map, Active)
+	if Active then
+		if type(Part) == "userdata" then
+			for _, Particle in pairs(Part:GetChildren()) do
+				if Particle:IsA("ParticleEmitter") then
+					Particle.Enabled = Enabled
+				end
+			end
+		elseif type(Part) == "string" then
+			if Map:FindFirstChild("String") then
+				for _, Particle in pairs(Map[Part]:GetChildren()) do
+					if Particle:IsA("ParticleEmitter") then
+						Particle.Enabled = Enabled
+					end
+				end
+			end
+		end
+	end
+end
+
+local TT = 0
+local Returned = nil
+function CheckWait()if game.Players.LocalPlayer.Character.Humanoid.Health <= 0 then return nil;end;wait(.1)TT += 1;if game.Players.LocalPlayer.Character.Humanoid.Health <= 0 then return nil;end;return true;end
+__.Wait = function(Amount, Active)
+	if Active then
+		Amount *= 10
+		Amount = math.floor(Amount)
+		TT = 0
+		while true do
+			Returned = CheckWait()
+			if not Returned then break
+			elseif TT >= Amount then break
+			end
+		end
+		return Returned
+	end
 end
