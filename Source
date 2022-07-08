@@ -1,2 +1,6 @@
-print()
-p
+local T = 0
+while wait() do
+  T += 1;
+  print(T)
+  if T >= 10 then break;end;
+end
